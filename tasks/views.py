@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from tasks.forms import TaskForm
+from tasks.forms import TaskModelForm
 from tasks.models import Employee,Task
 
 
@@ -12,26 +12,28 @@ def user_dashboard(request):
 
 def create_task(request):
     employees=Employee.objects.all()
-    forms=TaskForm(employees=employees)
+    # forms=TaskForm(employees=employees)
 
     if request.method=="POST":
-        forms=TaskForm(request.POST,employees=employees)
+        forms=TaskModelForm(request.POST,employees=employees)
 
         if(forms.is_valid()):
-            data = forms.cleaned_data()
-            title = data.get('title')
-            description = data.get('description')
-            due_date = data.get('due_date')
-            assigned_to = data.get('assigned_to')  # list [1,3]
+            forms.save()
+            return render(request,"task_from.html",{"form":"forms"," message" : "Submitted successfully"})
+            # data = forms.cleaned_data()
+            # title = data.get('title')
+            # description = data.get('description')
+            # due_date = data.get('due_date')
+            # assigned_to = data.get('assigned_to')
 
-            task = Task.objects.create(title=title, description=description, due_date=due_date)
+            # task = Task.objects.create(title=title, description=description, due_date=due_date)
 
-            for emp_id in assigned_to:
-                employee = Employee.objects.get(id=emp_id)
-                task.assigned_to.add(employee)
+            # for emp_id in assigned_to:
+            #     employee = Employee.objects.get(id=emp_id)
+            #     task.assigned_to.add(employee)
 
 
-            return HttpResponse("Task Added successfully")
+            # return HttpResponse("Task Added successfully")
 
     context={"forms":forms}
     return render(request,"task_form.html",context)
