@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from tasks.forms import TaskModelForm
+from tasks.forms import TaskModelForm,TaskForm
 from tasks.models import Employee,Task
 
 
@@ -12,14 +12,14 @@ def user_dashboard(request):
 
 def create_task(request):
     employees=Employee.objects.all()
-    # forms=TaskForm(employees=employees)
+    forms=TaskModelForm()
 
     if request.method=="POST":
-        forms=TaskModelForm(request.POST,employees=employees)
+        forms=TaskModelForm(request.POST)
 
         if(forms.is_valid()):
             forms.save()
-            return render(request,"task_from.html",{"form":"forms"," message" : "Submitted successfully"})
+            return render(request,"task_form.html",{"forms":forms,"message" : "Submitted successfully"})
             # data = forms.cleaned_data()
             # title = data.get('title')
             # description = data.get('description')

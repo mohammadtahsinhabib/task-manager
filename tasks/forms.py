@@ -19,6 +19,8 @@ class TaskModelForm(forms.ModelForm):
         model=Task
         fields=['title','descriptions','due_date','assigned_to']
         widgets={
+            "title":forms.TextInput(attrs={
+            class : "bordee-2 border-gray-300 w-full rounded-lg shadow-sm focus: border-rose-300","placeholder"="Enter..."})
             "due_date":forms.SelectDateWidget(),
             "assigned_to":forms.CheckboxSelectMultiple(),
         }
