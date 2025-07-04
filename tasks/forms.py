@@ -1,5 +1,5 @@
 from django import forms
-from tasks.models import Task
+from tasks.models import Task,TaskDetails
 
 class TaskForm(forms.Form):
 
@@ -17,11 +17,12 @@ class TaskForm(forms.Form):
 
 
 
-
 class StyledFormMixin:
-    """ Mixing to apply style to form field"""
-
-    default_classes = "border-2 border-gray-300 w-full p-3 rounded-lg shadow-sm focus:outline-none focus:border-rose-500 focus:ring-rose-500"
+    default_classes = (
+        "w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm "
+        "focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 "
+        "bg-white text-gray-900 placeholder-gray-400"
+    )
 
     def apply_styled_widgets(self):
         for field_name, field in self.fields.items():
@@ -33,16 +34,16 @@ class StyledFormMixin:
             elif isinstance(field.widget, forms.Textarea):
                 field.widget.attrs.update({
                     'class': f"{self.default_classes} resize-none",
-                    'placeholder':  f"Enter {field.label.lower()}",
+                    'placeholder': f"Enter {field.label.lower()}",
                     'rows': 5
                 })
             elif isinstance(field.widget, forms.SelectDateWidget):
                 field.widget.attrs.update({
-                    "class": "border-2 border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:border-rose-500 focus:ring-rose-500"
+                    'class': self.default_classes
                 })
             elif isinstance(field.widget, forms.CheckboxSelectMultiple):
                 field.widget.attrs.update({
-                    'class': "space-y-2"
+                    'class': "space-y-2 ml-3 text-gray-800"
                 })
             else:
                 field.widget.attrs.update({
@@ -62,3 +63,11 @@ class TaskModelForm(StyledFormMixin,forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.apply_styled_widgets()
 
+class TaskDetailsModelForm(StyledFormMixin,forms.ModelForm):
+    class Meta:
+        model=TaskDetails
+        fields = ["priority","notes"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_styled_widgets()    

@@ -13,7 +13,7 @@ class Employee(models.Model):
 class Task(models.Model):
     STATUS_CHOICES=[
         {"PENDING","Pending"},
-        {"IN_PROGRESS","Inp Progress"},
+        {"IN_PROGRESS","In Progress"},
         {"COMPLETED","Completed"}
     ]
 
@@ -41,8 +41,8 @@ class TaskDetails(models.Model):
         (LOW,"Low"),
     )
     
-    task=models.OneToOneField(Task,on_delete=models.CASCADE)
-    assigned_to=models.CharField(max_length=250)
+    task=models.OneToOneField(Task,on_delete=models.CASCADE,related_name="details")
+    # assigned_to=models.CharField(max_length=250)
     priority=models.CharField(max_length=1,choices=PRIORITY_OPTIONS,default=LOW,)
     notes=models.TextField(blank=True,null=True)
 
@@ -52,7 +52,7 @@ class TaskDetails(models.Model):
 
 class Project(models.Model):
     name =models.CharField(max_length=250)
-    description = models.TextField(blank=True,null=True)
+    descriptions = models.TextField(blank=True,null=True)
     start_date = models.DateField()
 
 
