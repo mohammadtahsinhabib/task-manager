@@ -49,6 +49,10 @@ class StyledFormMixin:
                 field.widget.attrs.update({
                     'class': self.default_classes
                 })
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.apply_styled_widgets()
+
 
 
 class TaskModelForm(StyledFormMixin,forms.ModelForm):
@@ -59,15 +63,9 @@ class TaskModelForm(StyledFormMixin,forms.ModelForm):
             "due_date":forms.SelectDateWidget,
             "assigned_to":forms.CheckboxSelectMultiple,
         }
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.apply_styled_widgets()
 
 class TaskDetailsModelForm(StyledFormMixin,forms.ModelForm):
     class Meta:
         model=TaskDetails
         fields = ["priority","notes"]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.apply_styled_widgets()    
