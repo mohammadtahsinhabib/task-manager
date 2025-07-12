@@ -4,8 +4,15 @@ from tasks.forms import TaskModelForm,TaskForm,TaskDetailsModelForm
 from tasks.models import Employee,Task
 from django.db.models import Count,Q
 from django.contrib import messages
+from django.contrib.auth.decorators import *
 
+def is_manager(user):
+    return user.groups.filter(name = 'Manager').exits()
 
+def is_user(user):
+    return user.groups.filter(name = 'Employee').exits()
+
+@user_passes_test(is_manager,login_url='no-permission')
 def manager_dashboard(request):
     type=request.GET.get("type","all")
     tasks=Task.objects.select_related("details").prefetch_related("assigned_to").all()
@@ -36,10 +43,13 @@ def manager_dashboard(request):
     }
     return render(request,"dashboard/admin_dashboard.html",context)
 
-
+@user_passes_test(is_user,login_url='no-permission')
 def user_dashboard(request):
     return render(request,"dashboard/user_dashboard.html")
 
+
+@login_required
+@permission_required("tasks.add_task",login_url="no-permission")
 def create_task(request):
     # employees=Employee.objects.all()
     task_forms=TaskModelForm()
@@ -60,6 +70,9 @@ def create_task(request):
     context={"task_form":task_forms,"task_details_form":task_details_forms}
     return render(request,"task_form.html",context)
 
+
+@login_required
+@permission_required("tasks.change_task",login_url="no-permission")
 def update_task(request,id):
     task=Task.objects.get(id=id)
     task_forms=TaskModelForm(instance=task)
@@ -81,7 +94,8 @@ def update_task(request,id):
     context={"task_form":task_forms,"task_details_form":task_details_forms}
     return render(request,"task_form.html",context)
 
-
+@login_required
+@permission_required("tasks.delete_task",login_url="no-permission")
 def delete_task(request,id):
     if request.method == "POST":
         task=get_object_or_404(task,id=id)
@@ -93,7 +107,8 @@ def delete_task(request,id):
         messages.error(request,"Something Went Wrong")
         return redirect("manager-dashboard")
 
-
+@login_required
+@permission_required("tasks.view_task",login_url="no-permission")
 def view_task(request):
     tasks = Task.objects.all()
     return render(request,"view_task.html",context={"tasks":tasks})    

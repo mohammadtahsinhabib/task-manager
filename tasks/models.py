@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.contrib import messages
 
 # Create your models here.
 
@@ -58,4 +62,10 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+
+@receiver(post_save,sender=Task)
+def task_creation_notification(sender,instance,**kwargs):
+    print('sender',sender)
+    print('instance',instance)
+    print(kwargs)
 

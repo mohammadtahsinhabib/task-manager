@@ -1,34 +1,16 @@
 from django.contrib.auth.forms import UserCreationForm
 import re
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User , Group , Permission
+from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from tasks.forms import StyledFormMixin
-
-class CustomRegistrationForm(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ["username","first_name","last_name","password","password2"]
-
-    def __init__(self, *args, **kwargs):
-        super(UserCreationForm,self).__init__(*args, **kwargs)
-        
-        for fieldname in ['username', 'password', 'password2']:
-            self.fields[fieldname].help_text = None
 
 class RegistrationForm(StyledFormMixin,forms.ModelForm):
     password= forms.CharField(widget=forms.PasswordInput)
     confirm_password= forms.CharField(widget=forms.PasswordInput)
     class Meta:
         model = User
-        fields = ["username","first_name","last_name","password","confirm_password"]
-    
-    # def clean_password(self):
-    
-    #     password = self.cleaned_data.get('password')
-    #     if not re.fullmatch(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$", password):
-    #         raise forms.ValidationError("Password must be at least 8 characters long and contain letters and digits.")
-        
-    #     return password
+        fields = ["username","first_name","last_name","email","password","confirm_password"]
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -76,4 +58,24 @@ class RegistrationForm(StyledFormMixin,forms.ModelForm):
         return cleaned_data
 
 
+class LoginForm(StyledFormMixin, AuthenticationForm):
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, **kwargs)
 
+class AssignmentForm(StyledFormMixin, forms.Form):
+    role = forms.ModelChoiceField(
+        queryset=Group.objects.all(),
+        empty_label="Select a Role"
+    )
+
+class CreateGroupForm(StyledFormMixin, forms.ModelForm):
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label='Assign Permission'
+    )
+    
+    class Meta:
+        model = Group
+        fields = ['name', 'permissions']
