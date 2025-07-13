@@ -63,7 +63,7 @@ def activate_user(request, user_id, token):
         return HttpResponse('User not found')
 
 def is_admin(user,login_url ='no-permission'):
-    return user.groups.filter(name='Admin').exits()
+    return user.groups.filter(name='Admin').exists()
 
 @user_passes_test(is_admin)
 def admin_dashboard(request):

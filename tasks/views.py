@@ -1,18 +1,19 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.http import HttpResponse
 from tasks.forms import TaskModelForm,TaskForm,TaskDetailsModelForm
-from tasks.models import Employee,Task
+from tasks.models import Task
 from django.db.models import Count,Q
 from django.contrib import messages
 from django.contrib.auth.decorators import *
+from users.views import is_admin
 
 def is_manager(user):
-    return user.groups.filter(name = 'Manager').exits()
+    return user.groups.filter(name = 'Admin').exists()
 
 def is_user(user):
-    return user.groups.filter(name = 'Employee').exits()
+    return user.groups.filter(name = 'Employee').exists()
 
-@user_passes_test(is_manager,login_url='no-permission')
+# @user_passes_test(is_manager,login_url='no-permission')
 def manager_dashboard(request):
     type=request.GET.get("type","all")
     tasks=Task.objects.select_related("details").prefetch_related("assigned_to").all()
@@ -51,13 +52,12 @@ def user_dashboard(request):
 @login_required
 @permission_required("tasks.add_task",login_url="no-permission")
 def create_task(request):
-    # employees=Employee.objects.all()
     task_forms=TaskModelForm()
     task_details_forms=TaskDetailsModelForm()
 
     if request.method=="POST":
         task_forms=TaskModelForm(request.POST)
-        task_details_forms=TaskDetailsModelForm(request.POST)
+        task_details_forms=TaskDetailsModelForm(request.POST,request.FILES)
 
         if(task_forms.is_valid() and task_details_forms.is_valid()):
             task=task_forms.save()
@@ -112,3 +112,32 @@ def delete_task(request,id):
 def view_task(request):
     tasks = Task.objects.all()
     return render(request,"view_task.html",context={"tasks":tasks})    
+
+
+@login_required
+@permission_required("tasks.view_task", login_url='no-permission')
+def task_details(request, task_id):
+    task = Task.objects.get(id=task_id)
+    status_choices = Task.STATUS_CHOICES
+
+    if request.method == 'POST':
+        selected_status = request.POST.get('task_status')
+        task.status = selected_status
+        task.save()
+        return redirect('task-details', task.id)
+
+    return render(request, 'task_details.html', {"task": task, 'status_choices': status_choices})
+
+
+@login_required
+def dashboard(request):
+    if is_manager(request.user):
+        return redirect('admin-dashbaord')
+    
+    if is_user(request.user):
+        return redirect('user-dashbaord')
+    
+    elif is_admin(request.user):
+        return redirect('users:admin-dashboard')
+    
+    return redirect('no-permission')
